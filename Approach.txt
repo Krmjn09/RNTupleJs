@@ -1,0 +1,70 @@
+**My Approach to the DummyNTuple Parser**
+
+#### **First, Wrapping My Head Around the Problem**  
+When I first saw this assignment, I was a bit overwhelmed. The goal was to parse a binary file into a JavaScript object, but I’d never worked with custom binary formats before. I started by reading `format.md` carefully, scribbling notes about the HEADER, FOOTER, and PAGES sections. The key points I jotted down were:  
+- **HEADER**: Contains metadata like the "DMMY" magic number, version, name, description, and a pointer to the FOOTER.  
+- **FOOTER**: Holds info about where each PAGE starts and how big it is.  
+- **PAGES**: Arrays of floats, each with their own checksum.  
+
+The biggest hurdle? **Checksums**. Every section (HEADER, FOOTER, PAGES) has one, and I knew I’d need to verify them all to make sure the data wasn’t corrupted.  
+
+---
+
+#### **Breaking It Down Step by Step**  
+I decided to tackle the problem in chunks to avoid getting stuck. Here’s how I mapped it out:  
+
+1. **Parsing the Header**  
+   - First, check the magic number ("DMMY"). If it’s not there, the file is invalid.  
+   - Then read the version (must be 10001), name, description, and footer offset.  
+   - Finally, verify the header checksum using `simpleHash`.  
+
+   *I messed up the checksum verification at first*—I forgot to exclude the checksum bytes from the calculation. Once I realized that, I sliced the byte array properly and it worked!  
+
+2. **Parsing the Footer**  
+   - Use the footer offset from the header to jump to the right spot.  
+   - Read how many pages there are, then loop through each page’s details (offset, size, elements).  
+   - Verify the footer checksum.  
+
+3. **Parsing the Pages**  
+   - For each page, jump to its offset and read the floats.  
+   - Verify the page checksum (again, making sure to exclude the checksum bytes).  
+
+4. **Displaying the Data**  
+   - Create a simple HTML page with a file upload button.  
+   - Use `FileReader` to process the binary file and display the parsed data.  
+
+---
+
+#### **The Nitty-Gritty Details**  
+- **Reading Binary Data**:  
+  I used the `ReadBuffer` class from `buffer.mjs` because it handled the low-level byte reading. For example, `readU32()` made extracting 32-bit integers straightforward.  
+
+- **Checksum Headaches**:  
+  The checksums were tricky. For the HEADER, I had to calculate the hash of all bytes *except* the checksum itself. I did this by slicing the byte array up to the checksum’s position.  
+
+- **Error Handling**:  
+  I added `try/catch` blocks everywhere. If the magic number is wrong or a checksum fails, the user gets a clear error message instead of a blank screen.  
+
+
+
+#### **Testing and Debugging**  
+
+
+To test, I:  
+1. Installed http-server using(npm install -g http-server) and then Ran `http-server` and opened `http://127.0.0.1:8000/main.html`.  
+2. Uploaded `DummyNTuple.bin` and checked if the parsed data matched the expected output.  
+3. Tried uploading invalid files (e.g., text files, corrupted binaries) to ensure errors like *"Invalid Magic Number"* or *"Checksum Mismatch"* were shown.  
+
+
+
+#### **What I Learned**  
+This project taught me:  
+- How binary files are structured and parsed.  
+- The importance of checksums for data integrity (I never realized how easy it is for a single byte to get corrupted!).  
+- How to use `ArrayBuffer` and typed arrays in JavaScript.  
+
+
+#### **Final Thoughts**  
+This assignment was very exciting. I hope my approach shows that I can break down complex problems and learn as I go.  
+
+😊

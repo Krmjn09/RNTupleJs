@@ -1,0 +1,7 @@
+#### **Testing and Debugging**  
+
+
+To test, I:  
+1. Installed http-server using(npm install -g http-server) and then Ran `http-server` and opened `http://127.0.0.1:8000/main.html`.  
+2. Uploaded `DummyNTuple.bin` and checked if the parsed data matched the expected output.  
+3. Tried uploading invalid files (e.g., text files, corrupted binaries) to ensure errors like *"Invalid Magic Number"* or *"Checksum Mismatch"* were shown.  

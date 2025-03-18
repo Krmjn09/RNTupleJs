@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DummyNTuple Viewer</title>
+</head>
+<body>
+  <h1>Upload Binary File</h1>
+  <label for="file-input">Choose a DummyNTuple file:</label>
+  <input type="file" id="file-input" />
+  <div id="output-container"></div>
+
+  <script type="module">
+    // Import the deserialization function
+    import { deserializeNTuple } from "./main.mjs";
+
+    // Add an event listener to handle file selection
+    document.getElementById("file-input").addEventListener("change", (event) => {
+      const selectedFile = event.target.files[0];
+      if (!selectedFile) return; // Exit if no file is selected
+
+      console.log("File selected:", selectedFile.name);
+
+      // Use FileReader to read the binary file
+      const fileReader = new FileReader();
+
+      fileReader.onload = () => {
+        try {
+          console.log("Parsing binary data...");
+          const parsedData = deserializeNTuple(fileReader.result); // Parse the binary content
+          displayParsedData(parsedData); // Display the parsed data on the page
+        } catch (error) {
+          console.error("Error during parsing:", error.message);
+          alert(`Failed to parse file: ${error.message}`);
+        }
+      };
+
+      // Read the file as an ArrayBuffer
+      fileReader.readAsArrayBuffer(selectedFile);
+    });
+
+    /**
+     * Displays the parsed DummyNTuple data on the webpage.
+     * @param {Object} data - The parsed DummyNTuple object.
+     */
+    function displayParsedData(data) {
+      console.log("Displaying parsed data:", data);
+
+      const outputContainer = document.getElementById("output-container");
+      outputContainer.innerHTML = `
+        <h2>${data.name || "Unnamed Dataset"}</h2>
+        <p>${data.description || "No description available"}</p>
+        ${data.pages.length > 0 
+          ? data.pages.map((page, index) => `
+              <div>
+                <h3>Page ${index + 1}</h3>
+                <pre>${page.join(", ")}</pre>
+              </div>
+            `).join("")
+          : "<p>No pages found in the dataset.</p>"
+        }
+      `;
+    }
+  </script>
+</body>
+</html>
